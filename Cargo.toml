@@ -4,4 +4,6 @@ version = "0.1.0"
 authors = ["Emilio Cobos Álvarez <emilio@crisal.io>"]
 
 [dependencies]
-clang-sys = { version = "0.21.0", features = ["runtime", "clang_3_9"] }
+glob = "0.2.11"
+libc = "0.2.14"
+libloading = "0.4.0"
