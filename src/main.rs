@@ -1,6 +1,7 @@
 extern crate libloading;
 
-/// The set of functions loaded dynamically.
+use std::os::raw::{c_int, c_void};
+
 #[derive(Debug, Default)]
 pub struct Functions {
     pub clang_createIndex: Option<unsafe extern fn(_: c_int, _: c_int) -> CXIndex>,
@@ -13,41 +14,18 @@ pub struct SharedLibrary {
     pub functions: Functions,
 }
 
-impl SharedLibrary {
-    //- Constructors -----------------------------
-
-    fn new(library: libloading::Library) -> SharedLibrary {
-        SharedLibrary { library: library, functions: Functions::default() }
-    }
-}
-
-mod load {
-    pub fn clang_createIndex(library: &mut super::SharedLibrary) {
-        let symbol = unsafe { library.library.get(b"clang_createIndex") }.ok();
-        library.functions.clang_createIndex = symbol.map(|s| *s);
-    }
-}
-
-/// Loads a `libclang` shared library and returns the library instance.
-///
-/// This function does not attempt to load any functions from the shared library. The caller
-/// is responsible for loading the functions they require.
-///
-/// # Failures
-///
-/// * a `libclang` shared library could not be found
-/// * the `libclang` shared library could not be opened
 pub fn load_manually() -> SharedLibrary {
     let file = "./target/debug/deps/libshared_lib.so";
     let library = libloading::Library::new(file).unwrap();
-    let mut library = SharedLibrary::new(library);
-    load::clang_createIndex(&mut library);
-    library
+    let mut functions = Functions::default();
+
+    {
+        let symbol = unsafe { library.get(b"clang_createIndex") }.ok();
+        functions.clang_createIndex = symbol.map(|s| *s);
+    }
+
+    SharedLibrary { library, functions }
 }
-
-use std::os::raw::{c_int, c_void};
-
-// Opaque ________________________________________
 
 pub type CXIndex = *mut c_void;
 
