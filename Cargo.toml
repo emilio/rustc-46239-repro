@@ -6,3 +6,4 @@ authors = ["Emilio Cobos Álvarez <emilio@crisal.io>"]
 [dependencies]
 glob = "0.2.11"
 libloading = "0.4.0"
+shared_lib = { path = "./shared_lib" }
