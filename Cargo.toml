@@ -5,5 +5,4 @@ authors = ["Emilio Cobos Álvarez <emilio@crisal.io>"]
 
 [dependencies]
 glob = "0.2.11"
-libc = "0.2.14"
 libloading = "0.4.0"

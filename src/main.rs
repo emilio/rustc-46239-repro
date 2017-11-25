@@ -1,5 +1,4 @@
 extern crate glob;
-extern crate libc;
 extern crate libloading;
 
 /// The set of functions loaded dynamically.
@@ -51,7 +50,8 @@ pub fn load_manually() -> Result<SharedLibrary, String> {
 
 use std::mem;
 
-use libc::{c_char, c_int, c_longlong, c_uint, c_ulong, c_ulonglong, c_void, time_t};
+use std::os::raw::{c_int, c_void};
+
 //================================================
 // Structs
 //================================================
@@ -66,9 +66,7 @@ pub struct CXVersion {
 
 // Opaque ________________________________________
 
-macro_rules! opaque { ($name:ident) => (pub type $name = *mut c_void;); }
-
-opaque!(CXIndex);
+pub type CXIndex = *mut c_void;
 
 mod build {
 use std::env;
