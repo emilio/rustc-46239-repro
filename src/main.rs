@@ -2,68 +2,25 @@ extern crate glob;
 extern crate libc;
 extern crate libloading;
 
-macro_rules! link {
-    ($($(#[cfg($cfg:meta)])* pub fn $name:ident($($pname:ident: $pty:ty), *) $(-> $ret:ty)*;)+) => (
-        use std::cell::{RefCell};
-        use std::sync::{Arc};
+/// The set of functions loaded dynamically.
+#[derive(Debug, Default)]
+pub struct Functions {
+    pub clang_createIndex: Option<unsafe extern fn(_: c_int, _: c_int) -> CXIndex>,
+}
 
-        /// The set of functions loaded dynamically.
-        #[derive(Debug, Default)]
-        pub struct Functions {
-            $($(#[cfg($cfg)])* pub $name: Option<unsafe extern fn($($pname: $pty), *) $(-> $ret)*>,)+
-        }
+/// A dynamically loaded instance of the `libclang` library.
+#[derive(Debug)]
+pub struct SharedLibrary {
+    library: libloading::Library,
+    pub functions: Functions,
+}
 
-        /// A dynamically loaded instance of the `libclang` library.
-        #[derive(Debug)]
-        pub struct SharedLibrary {
-            library: libloading::Library,
-            pub functions: Functions,
-        }
+impl SharedLibrary {
+    //- Constructors -----------------------------
 
-        impl SharedLibrary {
-            //- Constructors -----------------------------
-
-            fn new(library: libloading::Library) -> SharedLibrary {
-                SharedLibrary { library: library, functions: Functions::default() }
-            }
-        }
-
-        thread_local!(static LIBRARY: RefCell<Option<Arc<SharedLibrary>>> = RefCell::new(None));
-
-        /// Returns whether a `libclang` shared library is loaded on this thread.
-        pub fn is_loaded() -> bool {
-            LIBRARY.with(|l| l.borrow().is_some())
-        }
-
-        fn with_library<T, F>(f: F) -> Option<T> where F: FnOnce(&SharedLibrary) -> T {
-            LIBRARY.with(|l| {
-                match l.borrow().as_ref() {
-                    Some(library) => Some(f(&library)),
-                    _ => None,
-                }
-            })
-        }
-
-        $(
-            $(#[cfg($cfg)])*
-            pub unsafe fn $name($($pname: $pty), *) $(-> $ret)* {
-                let f = with_library(|l| {
-                    match l.functions.$name {
-                        Some(f) => f,
-                        _ => panic!(concat!("function not loaded: ", stringify!($name))),
-                    }
-                }).expect("a `libclang` shared library is not loaded on this thread");
-                f($($pname), *)
-            }
-
-            $(#[cfg($cfg)])*
-            pub mod $name {
-                pub fn is_loaded() -> bool {
-                    super::with_library(|l| l.functions.$name.is_some()).unwrap_or(false)
-                }
-            }
-        )+
-    )
+    fn new(library: libloading::Library) -> SharedLibrary {
+        SharedLibrary { library: library, functions: Functions::default() }
+    }
 }
 
 mod load {
@@ -112,10 +69,6 @@ pub struct CXVersion {
 macro_rules! opaque { ($name:ident) => (pub type $name = *mut c_void;); }
 
 opaque!(CXIndex);
-
-link! {
-    pub fn clang_createIndex(exclude: c_int, display: c_int) -> CXIndex;
-}
 
 mod build {
 use std::env;
