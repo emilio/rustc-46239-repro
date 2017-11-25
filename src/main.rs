@@ -338,57 +338,6 @@ pub fn find_shared_library() -> Result<PathBuf, String> {
     find(Library::Dynamic, &files, "LIBCLANG_PATH")
 }
 
-/// Returns the name of an LLVM or Clang library from a path to such a library.
-fn get_library_name(path: &Path) -> Option<String> {
-    path.file_stem().map(|p| {
-        let string = p.to_string_lossy();
-        if string.starts_with("lib") {
-            string[3..].to_owned()
-        } else {
-            string.to_string()
-        }
-    })
-}
-
-/// Returns the LLVM libraries required to link to `libclang` statically.
-fn get_llvm_libraries() -> Vec<String> {
-    run_llvm_config(&["--libs"]).unwrap().split_whitespace().filter_map(|p| {
-        // Depending on the version of `llvm-config` in use, listed libraries may be in one of two
-        // forms, a full path to the library or simply prefixed with `-l`.
-        if p.starts_with("-l") {
-            Some(p[2..].into())
-        } else {
-            get_library_name(Path::new(p))
-        }
-    }).collect()
-}
-
-/// Clang libraries required to link to `libclang` 3.5 and later statically.
-const CLANG_LIBRARIES: &'static [&'static str] = &[
-    "clang",
-    "clangAST",
-    "clangAnalysis",
-    "clangBasic",
-    "clangDriver",
-    "clangEdit",
-    "clangFrontend",
-    "clangIndex",
-    "clangLex",
-    "clangParse",
-    "clangRewrite",
-    "clangSema",
-    "clangSerialization",
-];
-
-/// Returns the Clang libraries required to link to `libclang` statically.
-fn get_clang_libraries<P: AsRef<Path>>(directory: P) -> Vec<String> {
-    let pattern = directory.as_ref().join("libclang*.a").to_string_lossy().to_string();
-    if let Ok(libraries) = glob::glob(&pattern) {
-        libraries.filter_map(|l| l.ok().and_then(|l| get_library_name(&l))).collect()
-    } else {
-        CLANG_LIBRARIES.iter().map(|l| l.to_string()).collect()
-    }
-}
 }
 
 fn main() {
