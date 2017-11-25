@@ -2,6 +2,3 @@
 name = "rustc-46239-repro"
 version = "0.1.0"
 authors = ["Emilio Cobos Álvarez <emilio@crisal.io>"]
-
-[dependencies]
-libloading = { path = "./libloading" }

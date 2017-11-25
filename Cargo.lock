@@ -1,11 +1,4 @@
 [[package]]
-name = "libloading"
-version = "0.1.0"
-
-[[package]]
 name = "rustc-46239-repro"
 version = "0.1.0"
-dependencies = [
- "libloading 0.1.0",
-]
 
