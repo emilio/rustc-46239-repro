@@ -1,4 +1,3 @@
-extern crate glob;
 extern crate libloading;
 
 /// The set of functions loaded dynamically.
