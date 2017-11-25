@@ -4,5 +4,4 @@ version = "0.1.0"
 authors = ["Emilio Cobos Álvarez <emilio@crisal.io>"]
 
 [dependencies]
-libloading = "0.4.0"
-shared_lib = { path = "./shared_lib" }
+libloading = { path = "./libloading" }

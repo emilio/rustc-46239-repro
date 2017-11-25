@@ -8,7 +8,6 @@ pub struct Functions {
 }
 
 /// A dynamically loaded instance of the `libclang` library.
-#[derive(Debug)]
 pub struct SharedLibrary {
     library: libloading::Library,
     pub functions: Functions,
