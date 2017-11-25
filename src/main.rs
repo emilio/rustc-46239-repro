@@ -48,8 +48,6 @@ pub fn load_manually() -> Result<SharedLibrary, String> {
     Ok(library)
 }
 
-use std::mem;
-
 use std::os::raw::{c_int, c_void};
 
 //================================================
@@ -70,7 +68,7 @@ pub type CXIndex = *mut c_void;
 
 mod build {
 use std::env;
-use std::fs::{self, File};
+use std::fs::{File};
 use std::io::{Read};
 use std::path::{Path, PathBuf};
 use std::process::{Command};
