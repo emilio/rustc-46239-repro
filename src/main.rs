@@ -37,14 +37,12 @@ mod load {
 ///
 /// * a `libclang` shared library could not be found
 /// * the `libclang` shared library could not be opened
-pub fn load_manually() -> Result<SharedLibrary, String> {
+pub fn load_manually() -> SharedLibrary {
     let file = "./target/debug/deps/libshared_lib.so";
-    let library = libloading::Library::new(file).map_err(|_| {
-        format!("the `libclang` shared library could not be opened: {}", file)
-    });
-    let mut library = SharedLibrary::new(try!(library));
+    let library = libloading::Library::new(file).unwrap();
+    let mut library = SharedLibrary::new(library);
     load::clang_createIndex(&mut library);
-    Ok(library)
+    library
 }
 
 use std::os::raw::{c_int, c_void};
@@ -54,7 +52,7 @@ use std::os::raw::{c_int, c_void};
 pub type CXIndex = *mut c_void;
 
 fn main() {
-    let lib = load_manually().unwrap();
+    let lib = load_manually();
     let fun = lib.functions.clang_createIndex.unwrap();
     unsafe { fun(0, 1) };
     println!("Did I survive?");
